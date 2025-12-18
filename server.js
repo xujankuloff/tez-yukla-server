@@ -2,57 +2,35 @@ import express from "express";
 import fetch from "node-fetch";
 
 const app = express();
+const port = 10000;
+
+// Instagramdan video yoki audio olish uchun '/download' endpoint
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-
-// -------- Instagram Downloader --------
 app.post("/download", async (req, res) => {
-  const { url, audio } = req.body || {};
+  const { url, audio } = req.body;
 
   if (!url) {
-    return res.status(400).json({ error: "URL yo‘q" });
+    return res.status(400).json({ message: "URL required" });
   }
 
   try {
-    // Instagram oEmbed orqali ma’lumot
-    const oe = await fetch(
-      `https://www.instagram.com/oembed/?url=${encodeURIComponent(url)}`
-    );
+    // Instagramdan media olish
+    const response = await fetch(`https://api.screenshotapi.net/screenshot?url=${encodeURIComponent(url)}`);
+    const data = await response.json();
 
-    if (!oe.ok) {
-      return res.status(400).json({ error: "Instagram ma’lumot topilmadi" });
+    if (data.file_url) {
+      const file = audio ? data.file_url.audio : data.file_url.video;
+      return res.json({ file });
+    } else {
+      return res.status(400).json({ message: "Failed to download media." });
     }
-
-    const data = await oe.json();
-
-    // Ba’zan Instagram video uchun direct url qaytaradi:
-    // data.thumbnail_url yoki boshqa maydonga qarang
-    const videoUrl =
-      data.thumbnail_url ||
-      data.url ||
-      data.video || // agar mavjud bo‘lsa
-      null;
-
-    if (!videoUrl) {
-      return res.status(404).json({ error: "Video link topilmadi" });
-    }
-
-    // Javobni yuboramiz
-    return res.json({
-      title: data.title || null,
-      author: data.author_name || null,
-      file: videoUrl,
-    });
-  } catch (e) {
-    console.error("SERVER ERROR:", e);
-    return res.status(500).json({ error: "Serverda xatolik" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error." });
   }
 });
 
-// Ping
-app.get("/", (req, res) => res.send("Instagram Downloader ishlayapti"));
-
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

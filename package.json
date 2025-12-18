@@ -2,11 +2,8 @@
   "name": "tez-yukla-server",
   "version": "1.0.0",
   "type": "module",
-  "scripts": {
-    "start": "node server.js"
-  },
   "dependencies": {
-    "express": "^4.18.2",
-    "node-fetch": "^3.3.2"
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.1"
   }
 }

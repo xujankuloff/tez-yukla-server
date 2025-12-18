@@ -1,0 +1,10 @@
+# Ignore system files and directories
+**/AppData/
+**/Cookies/
+**/Local Settings/
+**/Temporary Internet Files/
+**/Yandex/
+**/Documents/
+**/*.log
+**/*.bak
+**/.DS_Store
